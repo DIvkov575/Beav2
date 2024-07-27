@@ -1,0 +1,11 @@
+/Users/dmitriyivkov/IdeaProjects/Beaver/target/debug/deps/libfern-a68c8c35508b0d8e.rmeta: /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/lib.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/builders.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/errors.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/log_impl.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/meta.rs
+
+/Users/dmitriyivkov/IdeaProjects/Beaver/target/debug/deps/libfern-a68c8c35508b0d8e.rlib: /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/lib.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/builders.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/errors.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/log_impl.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/meta.rs
+
+/Users/dmitriyivkov/IdeaProjects/Beaver/target/debug/deps/fern-a68c8c35508b0d8e.d: /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/lib.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/builders.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/errors.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/log_impl.rs /Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/meta.rs
+
+/Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/lib.rs:
+/Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/builders.rs:
+/Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/errors.rs:
+/Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/log_impl.rs:
+/Users/dmitriyivkov/.cargo/registry/src/index.crates.io-6f17d22bba15001f/fern-0.6.2/src/meta.rs:

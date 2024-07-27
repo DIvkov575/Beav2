@@ -1,0 +1,16 @@
+config_path: ./src/beav
+biq_query:
+  project_id: ''
+  dataset_id: ''
+  table_id: ''
+output_pubsub:
+  topic_id: ''
+  bq_subscription_id: ''
+  subscription_id_2: ''
+compute_sa:
+  name: ''
+  email: ''
+  roles: []
+  description: ''
+bucket_name: ''
+crs_instance: ''
