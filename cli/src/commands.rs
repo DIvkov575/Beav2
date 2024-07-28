@@ -1,44 +1,52 @@
-use std::io;
-use anyhow::Result;
 use clap::{self, Parser};
 
-mod init;
-use init::init;
 
+// #[derive(Debug, Parser)]
+// #[command(
+//     version,
+//     about,
+//     long_about = None,
+//     after_help = "Note: `trash -h` prints a short and concise overview while `trash --help` gives all \
+//                  details.",
+// )]
+// pub struct Args {
 
-#[derive(Parser, Debug)]
-pub enum Command {
-    Init,
-    Manpage,
-}
-impl Command {
-    pub fn run(self) -> Result<()> {
-        use Command::*;
-        match self {
-            Init => init(),
-            _ => {print!("asldkfj"); return Ok(());}
+// }
 
-            // Tmp(args) => args.run(config_args),
-        }
+use std::io;
+
+use anyhow::Result;
+use clap::{CommandFactory, Parser};
+
+use crate::app;
+
+#[derive(Debug, Parser)]
+pub struct ManArgs {}
+
+impl ManArgs {
+    pub fn run(&self) -> Result<()> {
+        let man = clap_mangen::Man::new(app::Args::command());
+        man.render(&mut io::stdout())?;
+        Ok(())
     }
 }
 
-#[derive(Debug, Parser)]
-#[command(
-    version,
-    about,
-    long_about = None,
-)]
-pub struct Args {
-    #[clap(subcommand)]
-    pub command: Option<Command>,
+#[derive(Parser, Debug)]
+pub enum Command {
+    /// initialize beaver config dir
+    Init(),
+    /// Tmp
+    Tmp(),
+    /// Generates manpages
+    Manpage(),
 }
-impl Args {
-    pub fn run(self) -> Result<()> {
-        match self.command {
-            None => print!("No Command was passed"),
-            Some(command) => command.run()?,
+impl Command {
+    pub fn run(self, config_args: &super::ConfigArgs) -> Result<()> {
+        use Command::*;
+        match self {
+            Init() => Init,
+            // Tmp(args) => args.run(config_args),
+            Manpage(args) => args.run(),
         }
-        Ok(())
     }
 }
