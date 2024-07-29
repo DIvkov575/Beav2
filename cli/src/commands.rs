@@ -2,19 +2,27 @@ use std::io;
 use anyhow::Result;
 use clap::{self, Parser};
 
+mod deploy;
+use deploy::deploy;
+mod destroy;
+use destroy::destroy;
 mod init;
 use init::init;
 
 #[derive(Parser, Debug)]
 pub enum Command {
-    Init { path: Option<String> },
+    Init,
+    Destroy,
+    Deploy,
     Manpage,
 }
 impl Command {
     pub fn run(self) -> Result<()> {
         use Command::*;
         match self {
-            Init {path } => init(path),
+            Init => init(),
+            Deploy => deploy(),
+            Destroy => destroy(),
             _ => {print!("asldkfj"); return Ok(());}
         }
     }
