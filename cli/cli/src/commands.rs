@@ -9,15 +9,16 @@ use destroy::destroy;
 mod init;
 use init::init;
 
-mod tmp;
-use tmp::tmp;
 
 #[derive(Parser, Debug)]
 pub enum Command {
     #[command(about="Create a config")]
     Init,
     #[command(about="Create Beaver instance on GCP")]
-    Deploy,
+    Deploy {
+        #[arg(short, long)]
+        path: String
+    },
     #[command(about="Destroy Beaver instance")]
     Destroy,
 }
@@ -26,18 +27,17 @@ impl Command {
         use Command::*;
         match self {
             Init => init(),
-            Deploy => deploy(),
+            Deploy{path} => deploy(&path),
             Destroy => destroy(),
-            _ => {print!("asldkfj"); return Ok(());}
         }
     }
 }
 
 #[derive(Debug, Parser)]
 #[command(
-    version,
-    about,
-    long_about = None,
+version,
+about,
+long_about = None,
 )]
 pub struct Args {
     #[clap(subcommand)]
