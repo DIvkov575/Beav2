@@ -1,8 +1,7 @@
----
 sources:
   pubsub_in:
     type: gcp_pubsub
-    project: ""
+    project: ''
     subscription: input-sub-1
     decoding:
       codec: json
@@ -10,4 +9,13 @@ transforms:
   transform1:
     type: remap
     inputs:
-      - pubsub-in
+    - pubsub-in
+sinks:
+  bq_writing_pubsub:
+    type: gcp_pubsub
+    inputs:
+    - transform1
+    project: neon-circle-400322
+    topic: testtopic
+    encoding:
+      codec: json
