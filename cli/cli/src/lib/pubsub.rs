@@ -1,3 +1,4 @@
+use std::cmp::Reverse;
 use std::fmt::Display;
 use std::process::Command;
 use crate::lib::config::Config;
@@ -6,18 +7,25 @@ use log::warn;
 use rand::distributions::Alphanumeric;
 use rand::Rng;
 use crate::lib::bq::BqTable;
+use crate::lib::resources::Resources;
 
 
 pub struct PubSub {
     topic_id: String,
-    subscriptions: Vec<String>
+    subscription_id: String
 }
 
 impl PubSub {
+    pub fn new(topic_id: &str, subscription_id: &str) -> Self {
+        Self {
+            topic_id: topic_id.to_string(),
+            subscription_id: subscription_id.to_string(),
+        }
+    }
     pub fn empty() -> Self {
         Self {
             topic_id: String::new(),
-            subscriptions: Vec::new(),
+            subscription_id: String::new(),
         }
     }
 }
@@ -88,4 +96,17 @@ pub fn create_pubsub_topic(config: &Config) -> Result<String> {
         }
     }
    Ok(topic_binding)
+}
+
+
+pub fn create_pubsub_to_bq_subscription(resources: &Resources, config: &Config) -> Result<()> {
+    let bq_table = resources.biq_query.as_ref().unwrap().borrow();
+    let pubsub = resources.output_pubsub.as_ref().unwrap();
+
+    let topic_id = create_pubsub_topic(&config)?;
+    let subscription_id = create_bq_subscription(&topic_id, &bq_table, &config)?;
+
+    pubsub.set(PubSub::new(&topic_id, &subscription_id));
+
+    Ok(())
 }
