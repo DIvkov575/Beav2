@@ -1,12 +1,12 @@
 use std::fmt::format;
 use std::process::Command;
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use crate::lib::config::Config;
 use crate::lib::resources::Resources;
 
 
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize)]
 pub struct BqTable {
     pub project_id: String,
     pub dataset_id: String,
@@ -31,8 +31,7 @@ impl<'a> BqTable {
 }
 
 pub fn create_table(resources: &Resources, config: &Config) -> Result<()> {
-    let bq_table_binding = resources.biq_query.borrow();
-    let bq_table = bq_table_binding.as_ref().unwrap();
+    let bq_table = resources.biq_query.as_ref().unwrap().borrow();
     let id_binding = format!("{}:{}.{}", config.project, bq_table.dataset_id, bq_table.table_id);
     let args: Vec<&str> = Vec::from([
         "mk",
@@ -45,8 +44,12 @@ pub fn create_table(resources: &Resources, config: &Config) -> Result<()> {
 }
 
 pub fn create_dataset(resources: &Resources, config: &Config) -> Result<()> {
-    let bq_table_binding = resources.biq_query.borrow();
-    let bq_table = bq_table_binding.as_ref().unwrap();
+    // roles/bigquery.dataEditor
+    // roles/bigquery.dataOwner
+    // roles/bigquery.user
+    // roles/bigquery.admin
+
+    let bq_table = resources.biq_query.as_ref().unwrap().borrow();
     let id_binding = format!("{}:{}", config.project, bq_table.dataset_id);
     let args: Vec<&str> = Vec::from([
         "mk",

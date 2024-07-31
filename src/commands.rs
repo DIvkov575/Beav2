@@ -13,10 +13,7 @@ use init::init;
 #[derive(Parser, Debug)]
 pub enum Command {
     #[command(about="Create a config")]
-    Init {
-        #[arg(short, long, action)]
-        force: bool
-    },
+    Init,
     #[command(about="Create Beaver instance on GCP")]
     Deploy {
         #[arg(short, long)]
@@ -29,7 +26,7 @@ impl Command {
     pub fn run(self) -> Result<()> {
         use Command::*;
         match self {
-            Init{force} => init(force),
+            Init => init(),
             Deploy{path} => deploy(&path),
             Destroy => destroy(),
         }

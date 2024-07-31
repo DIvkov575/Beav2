@@ -1,10 +1,10 @@
 use std::process::Command;
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use crate::lib::config::Config;
 use crate::lib::resources::Resources;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Serialize)]
 pub struct SA {
     pub name: String,
     pub email: String,
@@ -36,7 +36,7 @@ pub fn create_service_account(sa_name: &str) -> Result<()> {
 pub fn add_sa_roles(sa_name: &str, config: &Config, roles: Vec<&str>) -> Result<()> {
     let member_binding = format!("--member=serviceAccount:{}@{}.iam.gserviceaccount.com", sa_name, config.project);
     let mut args: Vec<String> =  Vec::from([
-        "projects", "add-iam-policy-binding", &config.project,
+        "projects", "add-iam-policy-binding", config.project,
         &member_binding,
     ].map(|x|x.to_string()));
 
@@ -63,25 +63,19 @@ pub fn allow_service_account_impersonation(sa_name: &str, user_email: &str, conf
 pub fn create_creational_sa(user_email: &str, config: &Config) -> Result<()> {
     create_service_account("BeaverCreationalSA")?;
     allow_service_account_impersonation("BeaverCreationalSA", user_email, &config)?;
-    add_sa_roles("BeaverCreationalSA", &config, Vec::from([
+    add_sa_roles("BeaverCreationalSA", &config, vec![
         "roles/compute.instanceAdmin.v1", // creating compute sa
         "roles/iam.serviceAccountCreator", // creating compute sa
-        "roles/run.developer", // creating cloud run?
-        "roles/biqquery.admin", //bq
+        "roles/run.developer" // creating cloud run?
 
-    ]))?;
+    ])?;
 
-
-    // roles/bigquery.dataEditor
-    // roles/bigquery.dataOwner
-    // roles/bigquery.user
-    // roles/bigquery.admin
     Ok(())
 }
 
 pub fn create_compute_sa(user_email: &str, resources: &Resources, config: &Config) -> Result<()> {
-    let mut compute_sa = resources.compute_sa.borrow_mut();
-    compute_sa.name = String::from("BeaverComputeSA");
+    let compute_sa = resources.compute_sa.borrow_mut();
+    compute_sa.name = "BeaverComputeSA".to_String();
     compute_sa.email =format!("{}@{}.iam.gserviceaccount.com", compute_sa.name, config.project);
 
     create_service_account(&compute_sa.name)?;
