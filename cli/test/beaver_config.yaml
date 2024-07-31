@@ -1,16 +1,16 @@
-project_id: neon-circle-400322
+project_id: ...
 region: northamerica-northeast1
+bq_location: "us"
 
 sources:
   pubsub_in:
     type: gcp_pubsub
-    project: ''
-    subscription: 'input-sub-1'
+    project: "..."
+    subscription: "input-sub-1"
     decoding:
-      codec: 'json'
-
+      codec: "json"
 transforms:
   transform1:
     type: remap
     inputs:
-      - 'pubsub-in'
+      - pubsub-in
