@@ -1,32 +1,68 @@
-pub struct Config<'a> {
-    pub region: &'a str,
-    pub project: &'a str,
-    pub service_account: Option<&'a str>,
-    formatted_service_account: Option<String>
+use std::fs::File;
+use std::path::Path;
+use serde_yaml::{Mapping, Value};
+macro_rules! get {($config: ident,  $($b:literal,)*) => {
+    $config$([&Value::String($b.into())])*.clone().as_str().unwrap().to_owned()
+};}
+
+pub struct Config {
+    pub region: String,
+    pub project: String,
+    pub schedule: String,
+    pub service_account: Option<String>,
+    formatted_service_account: Option<String>,
 }
 
-impl<'a> Config<'a> {
-    pub fn new(region: &'a str, project: &'a str, service_account: Option<&'a str>) -> Config<'a> {
+impl Config {
+    pub fn new(region: &str, project: &str, service_account: Option<&str>) -> Config {
+        let service_account_binding: Option<String>;
+        let formatted_service_account_binding: Option<String>;
+
         if service_account.is_none() {
-            Self {region, project, service_account: None, formatted_service_account: None}
+            service_account_binding = None;
+            formatted_service_account_binding = None;
         } else {
-            Self {region, project, service_account, formatted_service_account: Some(format!("--impersonate-service-account={}", service_account.unwrap()))}
-        }
-    }
-    // pub fn empty() -> Config<'a> {
-    //     Config {region: "", project: "", service_account: None, formatted_service_account: None}
-    // }
-    //
-    // pub fn new_from_file(path: &str ) -> {}
-    pub fn flatten(&self) -> Vec<&str> {
-        if self.service_account.is_none() {
-            Vec::from(["--region", self.region, "--project", self.project,  ])
-        } else {
-            Vec::from(["--region", self.region, "--project", self.project,  self.formatted_service_account.as_ref().unwrap().as_ref()])
+            service_account_binding = Some(service_account.unwrap().to_string());
+            formatted_service_account_binding = Some(format!("--impersonate-service-account={}", service_account.unwrap()));
         }
 
+        Self {
+            region: region.to_string(),
+            project: project.to_string(),
+            schedule: "0 * * * *".to_string(),
+            service_account: service_account_binding,
+            formatted_service_account: formatted_service_account_binding,
+        }
     }
-    pub fn get_region(&self) -> Vec<&str> { Vec::from(["--region", self.region]) }
-    pub fn get_project(&self) -> Vec<&str> { Vec::from(["--project", self.project]) }
+
+    pub fn from_path(path_to_config: &Path) -> Config {
+        let beaver_config: Mapping = serde_yaml::from_reader(
+            File::open(
+                path_to_config.join("../beaver_config/beaver_config.yaml")
+            ).unwrap()
+        ).unwrap();
+
+        let region_binding = get!(beaver_config, "region",);
+        let project_id_binding = get!(beaver_config, "project_id",);
+        let schedule_binding = get!(beaver_config, "schedule",);
+
+        Config {
+            region: region_binding,
+            project: project_id_binding,
+            schedule: schedule_binding,
+            service_account: None,
+            formatted_service_account: None,
+        }
+    }
+
+    pub fn flatten(&self) -> Vec<&str> {
+        if self.service_account.is_none() {
+            Vec::from(["--region", &self.region, "--project", &self.project, ])
+        } else {
+            Vec::from(["--region", &self.region, "--project", &self.project, self.formatted_service_account.as_ref().unwrap().as_ref()])
+        }
+    }
+    pub fn get_region(&self) -> Vec<&str> { Vec::from(["--region", &self.region]) }
+    pub fn get_project(&self) -> Vec<&str> { Vec::from(["--project", &self.project]) }
     pub fn get_service_account(&self) -> Vec<&str> { Vec::from([self.formatted_service_account.as_ref().unwrap().as_ref()]) }
 }

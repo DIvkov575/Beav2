@@ -1,50 +1,27 @@
-use std::cell::{Cell, RefCell};
-use std::error::Error;
-use std::fmt::format;
 use std::fs::{File, OpenOptions};
-use std::io::Stdout;
-use std::net::Shutdown::Read;
 use std::path::Path;
-use std::process::{exit, Stdio};
 
 use anyhow::{anyhow, Result};
 use serde_yaml::{Mapping, Value};
 
-use crate::lib::{
-    config::Config,
-    pubsub, bq::{
-        BqTable,
-        self
-    },
-    gcs,
-    resources,
-    crj,
-    cron,
-};
-use crate::lib::pubsub::PubSub;
+use crate::lib::{bq::{
+    self
+}, config::Config, crj, cron, gcs};
 use crate::lib::resources::Resources;
 
 pub fn deploy(path_arg: &str) -> Result<()> {
+    validate_config_path(&Path::new(path_arg))?;
+    bq::check_for_bq()?;
+    bq::check_for_gcloud()?;
 
     let path = Path::new(path_arg);
-    validate_config_path(&path)?;
-    let beaver_config: Mapping = serde_yaml::from_reader(File::open(path.join("beaver_config.yaml"))?)?;
-    let config: Config = Config::new(
-        &beaver_config[&Value::String("region".into())].clone().as_str().unwrap().to_owned(),
-        &beaver_config[&Value::String("project_id".into())].clone().as_str().unwrap().to_owned(),
-        None
-    );
+    let config: Config = Config::from_path(&path);
+    let mut resources: Resources =  serde_yaml::from_reader(
+        File::open(path.join("artifacts/resources.yaml"))?
+    )?;
 
-    let mut resources: Resources = Resources::empty();
-    resources.config_path = path.to_str().unwrap().to_string();
-    resources.biq_query = Some(RefCell::new(BqTable::new(config.project, "beaver_data_warehouse", "table1")));
-    resources.crj_instance = RefCell::new(String::from("beaver-vector-instance-1"));
-    resources.output_pubsub = Some(RefCell::new(PubSub::empty()));
-
-    // bq::check_for_bq()?;
-    // bq::create_dataset(&resources, &config)?;
-    // bq::create_table(&resources, &config)?;
-    pubsub::create_pubsub_to_bq_subscription(&resources, &config)?;
+    resources.biq_query.get_mut().unwrap().create()?;
+    resources.output_pubsub.get_mut().unwrap().create(&resources, &config)?;
     generate_vector_config(&path, &resources, &config)?;
 
     gcs::create_bucket(&resources, &config)?;
@@ -53,14 +30,10 @@ pub fn deploy(path_arg: &str) -> Result<()> {
             .join("artifacts/vector.yaml")
             .to_str()
             .ok_or(anyhow!("path `<config>/artifacts/vector.yaml`"))?,
-        &resources, &config
-    )?;
+        &resources, &config)?;
 
     crj::create_vector(&resources, &config)?;
-
-    // let scheduler = "11 * * * *";
-    // cron::create_scheduler(scheduler, &resources, &config)?;
-
+    cron::create_scheduler(&resources, &config)?;
 
 
 
@@ -68,10 +41,14 @@ pub fn deploy(path_arg: &str) -> Result<()> {
     Ok(())
 }
 
+
+
 fn generate_vector_config(path: &Path, resources: &Resources, config: &Config ) -> Result<()> {
-    let beaver_config: Mapping = serde_yaml::from_reader(&File::open(path.join("beaver_config.yaml"))?)?;
+    let beaver_config: Mapping = serde_yaml::from_reader(&File::open(path.join("../beaver_config/beaver_config.yaml"))?)?;
     let vector_config_file = OpenOptions::new().write(true).create(true).open(path.join("artifacts/vector.yaml"))?;
-    let output_pubsub = resources.output_pubsub.as_ref().unwrap().borrow();
+
+    let _output_pubsub_binding= resources.output_pubsub.borrow();
+    let output_pubsub = _output_pubsub_binding.as_ref().unwrap();
     let sources_yaml =  beaver_config[&Value::String("sources".into())].clone();
     let transforms_yaml =  beaver_config[&Value::String("transforms".into())].clone();
 
@@ -91,7 +68,7 @@ fn generate_vector_config(path: &Path, resources: &Resources, config: &Config ) 
         (Value::String("bq_writing_pubsub".into()), Value::Mapping(Mapping::from_iter([
             (Value::String("type".into()), Value::String("gcp_pubsub".into())),
             (Value::String("inputs".into()), Value::Sequence(serde_yaml::Sequence::from(transforms))),
-            (Value::String("project".into()), Value::String(config.project.into())),
+            (Value::String("project".into()), Value::String(config.project.clone().into())),
             (Value::String("topic".into()), Value::String(output_pubsub.topic_id.clone().into())),
             (Value::String("encoding".into()), Value::Mapping(Mapping::from_iter([
                 ("codec".into(), "json".into())
@@ -111,7 +88,7 @@ fn generate_vector_config(path: &Path, resources: &Resources, config: &Config ) 
 }
 
 fn validate_config_path(path: &Path) -> Result<()> {
-    if !path.join("beaver_config.yaml").exists() {
+    if !path.join("../beaver_config/beaver_config.yaml").exists() {
         return Err(anyhow::anyhow!("config path does not exist or broken"));
     }
     Ok(())

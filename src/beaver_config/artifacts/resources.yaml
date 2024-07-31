@@ -1,0 +1,11 @@
+config_path: src/beav
+biq_query: null
+output_pubsub: null
+cron_job: ''
+compute_sa:
+  name: ''
+  email: ''
+  roles: []
+  description: ''
+gcs_bucket: null
+crj_instance: ''
