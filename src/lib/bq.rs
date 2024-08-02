@@ -9,10 +9,11 @@ use crate::lib::config::Config;
 use crate::lib::resources::Resources;
 
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct BqTable {
     pub project_id: String,
-    pub dataset_id: String,
+    pub dataset_id: String
+//
     pub table_id: String,
 
 }
