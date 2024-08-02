@@ -12,9 +12,10 @@ use crate::lib::resources::Resources;
 #[macro_export]
 macro_rules! gm {($a:ident, $($b:literal,)*) => {$a$(.get_mut(&serde_yaml::Value::String($b.to_owned().into())).unwrap())*};}
 
-pub fn create_vector(resources: &Resources, config: &Config) -> Result<()> {
-    let mut crj_instance_id = resources.crj_instance.borrow_mut();
-    let bucket_name = resources.bucket_name.borrow().clone().unwrap();
+pub fn create_vector(resources: &mut Resources, config: &Config) -> Result<()> {
+    info!("creating vector...");
+    let mut crj_instance_id = &mut resources.crj_instance;
+    let bucket_name = resources.bucket_name.clone();
 
     if crj_instance_id.as_str() == "" {
         *crj_instance_id = create_crj_unnamed(&config)?;
@@ -52,13 +53,13 @@ fn create_crj_unnamed(config: &Config) -> Result<String>{
 fn create_crj_named(job_name: &str, config: &Config) -> Result<()>{
     let image_url = "docker.io/timberio/vector:latest-alpine";
     let args: Vec<&str> =  Vec::from(["run", "jobs", "create", job_name, "--image", image_url]);
-    print!("{:?}", args);
     Command::new("gcloud").args(args).args(config.flatten()).status()?;
     Ok(())
 }
 
 pub fn execute_crj(resources: &Resources, config: &Config) -> Result<()> {
-    let crj_instance = resources.crj_instance.clone().into_inner();
+    info!("executing crj...");
+    let crj_instance = resources.crj_instance.clone();
     let args: Vec<&str> =  Vec::from(["run", "jobs", "execute", &crj_instance]);
     Command::new("gcloud").args(args).args(config.flatten()).status()?;
     Ok(())
