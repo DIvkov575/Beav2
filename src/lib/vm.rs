@@ -17,14 +17,14 @@ pub fn create_mig_template(config: &Config, resources: &mut Resources) -> Result
 }
 
 pub fn exec_mig_template(config: &Config, resources: &Resources) -> Result<()> {
-    // gcloud compute instance-groups managed create example-group \
+    // gcloud compute instance-groups managed create asdfesdfxample-group \
     // --base-instance-name nginx-vm \
     // --size 3 \
     // --template nginx-template,
 
     let x = "vector-mig-1";
     let x1 = "beaver-vector-1";
-    let size = 1;
+    let size = "1";
     let args = vec!["compute", "instance-groups", "managed", "create", x,
                     "--base-instance-name", x1,
                     "--size", size,
